@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: menu
+      POSTGRES_PASSWORD: menu_local_only
+      POSTGRES_DB: virtual_menu
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - menu_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U menu -d virtual_menu"]
+      interval: 5s
+      retries: 10
+volumes:
+  menu_db:

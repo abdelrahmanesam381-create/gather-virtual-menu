@@ -1,0 +1,178 @@
+// Virtual Menu Platform: Prisma schema (MVP)
+// Source: PRD dated Oct 16, 2026
+//
+// Entities: Admin, Menu, MenuAdmin (join), Category, Item, Placement, Invitation
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// Admins and access (PRD §3, FR-14, FR-16)
+// ─────────────────────────────────────────────
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String // FR-14: email + password, hashed (argon2/bcrypt)
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  menus           MenuAdmin[]
+  sentInvitations Invitation[] @relation("InvitedBy")
+
+  @@map("admins")
+}
+
+// Explicit join table: Admins <-> Menus is many-to-many.
+// Explicit (not implicit) so we can store joinedAt now and a `role`
+// column later if the owner-vs-editor open question is approved.
+model MenuAdmin {
+  menuId   String
+  adminId  String
+  joinedAt DateTime @default(now())
+
+  menu  Menu  @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  // FR-16 ("cannot remove the last remaining admin") is enforced in the
+  // service layer inside a transaction, not by the database.
+  @@id([menuId, adminId])
+  @@index([adminId])
+  @@map("menu_admins")
+}
+
+// ─────────────────────────────────────────────
+// Menu: one public page per menu (FR-12, FR-13, FR-17)
+// ─────────────────────────────────────────────
+
+model Menu {
+  id   String @id @default(cuid())
+  slug String @unique // public URL: /m/{slug}. Format is an open question.
+
+  // Currency shown next to every price (PRD §11: one currency per menu)
+  currency String @default("EGP") // ISO 4217
+
+  // Header (FR-12): all optional
+  pageTitle      String?
+  bannerImageUrl String?
+  description    String?
+
+  // Footer (FR-13): all optional, empty fields are hidden on the public page
+  address      String?
+  mapUrl       String?
+  phone        String?
+  contactEmail String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  admins      MenuAdmin[]
+  categories  Category[]
+  items       Item[]
+  invitations Invitation[]
+
+  @@map("menus")
+}
+
+// ─────────────────────────────────────────────
+// Categories (FR-1 to FR-3)
+// ─────────────────────────────────────────────
+
+model Category {
+  id          String  @id @default(cuid())
+  menuId      String
+  name        String
+  description String? // FR-2: optional, nice-to-have
+  position    Int // FR-9/FR-11: new categories get max(position) + 1
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  menu       Menu        @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  placements Placement[]
+
+  // Not unique on purpose: reordering swaps positions inside a transaction,
+  // and a unique constraint would fail mid-update (Prisma has no deferrable constraints).
+  @@index([menuId, position])
+  @@map("categories")
+}
+
+// ─────────────────────────────────────────────
+// Items (FR-4 to FR-8)
+// ─────────────────────────────────────────────
+
+model Item {
+  id          String  @id @default(cuid())
+  menuId      String
+  title       String // required (FR-5)
+  description String?
+  price       Decimal @db.Decimal(10, 2) // required (FR-5). Decimal, never Float, for money.
+  photoUrl    String? // resized/validated upload (FR-6)
+  isHidden    Boolean @default(false) // FR-8: hide when sold out, without deleting
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  menu       Menu        @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  placements Placement[]
+
+  @@index([menuId])
+  @@map("items")
+}
+
+// ─────────────────────────────────────────────
+// Placement: item <-> category, with order per category (FR-7, FR-9)
+// ─────────────────────────────────────────────
+
+model Placement {
+  id         String @id @default(cuid())
+  itemId     String
+  categoryId String
+  position   Int // FR-11: new placements go to the end of that category
+
+  item     Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // An item can appear in a category only once.
+  @@unique([itemId, categoryId])
+  // Public page query: items of a category, in admin order.
+  @@index([categoryId, position])
+  @@map("placements")
+}
+
+// ─────────────────────────────────────────────
+// Invitations (A9, FR-15)
+// ─────────────────────────────────────────────
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+}
+
+model Invitation {
+  id          String           @id @default(cuid())
+  menuId      String
+  invitedById String?
+  email       String
+  tokenHash   String           @unique // store a hash of the emailed token, never the raw token
+  status      InvitationStatus @default(PENDING)
+  expiresAt   DateTime // FR-15: createdAt + 7 days. "Expired" is derived: PENDING and expiresAt < now()
+  acceptedAt  DateTime? // single-use: set once when accepted
+  createdAt   DateTime         @default(now())
+
+  menu      Menu   @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  invitedBy Admin? @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  // "Pending invites" list on the Team tab.
+  @@index([menuId, status])
+  @@index([email])
+  @@map("invitations")
+}

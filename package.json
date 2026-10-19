@@ -1,0 +1,55 @@
+{
+  "name": "gather-virtual-menu",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "prisma generate && next build",
+    "start": "next start --hostname 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "test:integration": "tsx --test tests/integration/*.test.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:check": "node scripts/check-connection.mjs",
+    "db:check": "node scripts/check-connection.mjs",
+    "db:seed": "prisma db seed",
+    "docs:generate": "node docs/tools/generate.mjs",
+    "docs:check": "node docs/tools/generate.mjs --check",
+    "format": "prettier --write src tests prisma scripts docs/tools package.json tsconfig.json next.config.ts playwright.config.ts",
+    "format:check": "prettier --check src tests prisma scripts docs/tools package.json tsconfig.json next.config.ts playwright.config.ts",
+    "db:local": "node scripts/local-db.mjs",
+    "test:browser": "playwright test",
+    "public:start": "tsx scripts/public-server.tsx",
+    "check:patterns": "node scripts/check-patterns.mjs"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma",
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.0",
+    "bcryptjs": "^3.0.2",
+    "lucide-react": "^0.468.0",
+    "next": "^16.0.0",
+    "nodemailer": "^7.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "sharp": "^0.34.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^24.0.0",
+    "@types/nodemailer": "^7.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "embedded-postgres": "^18.4.0-beta.17",
+    "prettier": "^3.6.0",
+    "prisma": "6.19.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}

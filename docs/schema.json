@@ -1,0 +1,397 @@
+{
+  "models": [
+    {
+      "name": "Admin",
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "email",
+          "type": "String"
+        },
+        {
+          "name": "passwordHash",
+          "type": "String"
+        },
+        {
+          "name": "name",
+          "type": "String?"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "menus",
+          "type": "MenuAdmin[]"
+        },
+        {
+          "name": "sentInvitations",
+          "type": "Invitation[]"
+        },
+        {
+          "name": "sessions",
+          "type": "Session[]"
+        }
+      ]
+    },
+    {
+      "name": "Session",
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "adminId",
+          "type": "String"
+        },
+        {
+          "name": "expiresAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "admin",
+          "type": "Admin"
+        }
+      ]
+    },
+    {
+      "name": "RateLimit",
+      "fields": [
+        {
+          "name": "key",
+          "type": "String"
+        },
+        {
+          "name": "count",
+          "type": "Int"
+        },
+        {
+          "name": "resetAt",
+          "type": "DateTime"
+        }
+      ]
+    },
+    {
+      "name": "MenuAdmin",
+      "fields": [
+        {
+          "name": "menuId",
+          "type": "String"
+        },
+        {
+          "name": "adminId",
+          "type": "String"
+        },
+        {
+          "name": "joinedAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "menu",
+          "type": "Menu"
+        },
+        {
+          "name": "admin",
+          "type": "Admin"
+        }
+      ]
+    },
+    {
+      "name": "Menu",
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "slug",
+          "type": "String"
+        },
+        {
+          "name": "currency",
+          "type": "String"
+        },
+        {
+          "name": "pageTitle",
+          "type": "String?"
+        },
+        {
+          "name": "bannerImageUrl",
+          "type": "String?"
+        },
+        {
+          "name": "description",
+          "type": "String?"
+        },
+        {
+          "name": "address",
+          "type": "String?"
+        },
+        {
+          "name": "mapUrl",
+          "type": "String?"
+        },
+        {
+          "name": "phone",
+          "type": "String?"
+        },
+        {
+          "name": "contactEmail",
+          "type": "String?"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "admins",
+          "type": "MenuAdmin[]"
+        },
+        {
+          "name": "categories",
+          "type": "Category[]"
+        },
+        {
+          "name": "items",
+          "type": "Item[]"
+        },
+        {
+          "name": "invitations",
+          "type": "Invitation[]"
+        }
+      ]
+    },
+    {
+      "name": "Category",
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "menuId",
+          "type": "String"
+        },
+        {
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "name": "description",
+          "type": "String?"
+        },
+        {
+          "name": "position",
+          "type": "Int"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "menu",
+          "type": "Menu"
+        },
+        {
+          "name": "placements",
+          "type": "Placement[]"
+        }
+      ]
+    },
+    {
+      "name": "Item",
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "menuId",
+          "type": "String"
+        },
+        {
+          "name": "title",
+          "type": "String"
+        },
+        {
+          "name": "description",
+          "type": "String?"
+        },
+        {
+          "name": "price",
+          "type": "Decimal"
+        },
+        {
+          "name": "photoUrl",
+          "type": "String?"
+        },
+        {
+          "name": "isHidden",
+          "type": "Boolean"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "menu",
+          "type": "Menu"
+        },
+        {
+          "name": "placements",
+          "type": "Placement[]"
+        }
+      ]
+    },
+    {
+      "name": "Placement",
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "itemId",
+          "type": "String"
+        },
+        {
+          "name": "categoryId",
+          "type": "String"
+        },
+        {
+          "name": "position",
+          "type": "Int"
+        },
+        {
+          "name": "item",
+          "type": "Item"
+        },
+        {
+          "name": "category",
+          "type": "Category"
+        }
+      ]
+    },
+    {
+      "name": "Invitation",
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "menuId",
+          "type": "String"
+        },
+        {
+          "name": "invitedById",
+          "type": "String?"
+        },
+        {
+          "name": "email",
+          "type": "String"
+        },
+        {
+          "name": "tokenHash",
+          "type": "String"
+        },
+        {
+          "name": "status",
+          "type": "InvitationStatus"
+        },
+        {
+          "name": "expiresAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "acceptedAt",
+          "type": "DateTime?"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "menu",
+          "type": "Menu"
+        },
+        {
+          "name": "invitedBy",
+          "type": "Admin?"
+        }
+      ]
+    }
+  ],
+  "enums": [
+    {
+      "name": "InvitationStatus",
+      "values": [
+        "PENDING",
+        "ACCEPTED",
+        "REVOKED"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "from": "Admin",
+      "to": "MenuAdmin",
+      "label": "membership"
+    },
+    {
+      "from": "Menu",
+      "to": "MenuAdmin",
+      "label": "admins"
+    },
+    {
+      "from": "Menu",
+      "to": "Category",
+      "label": "categories"
+    },
+    {
+      "from": "Menu",
+      "to": "Item",
+      "label": "items"
+    },
+    {
+      "from": "Item",
+      "to": "Placement",
+      "label": "placements"
+    },
+    {
+      "from": "Category",
+      "to": "Placement",
+      "label": "placements"
+    },
+    {
+      "from": "Menu",
+      "to": "Invitation",
+      "label": "invitations"
+    },
+    {
+      "from": "Admin",
+      "to": "Session",
+      "label": "sessions"
+    }
+  ]
+}
