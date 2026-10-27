@@ -1,7 +1,6 @@
-import { mkdir, readFile, writeFile, rename } from "node:fs/promises";
 import path from "node:path";
-import { randomUUID } from "node:crypto";
 import { db } from "./db";
+import { getObject, putObject } from "./storage";
 import { menuInclude } from "./menu-service";
 import type { MenuData } from "./types";
 const dir = () =>
@@ -27,11 +26,13 @@ export async function refreshSnapshot(menuId: string) {
   });
   if (!menu) return;
   const data = publicData(JSON.parse(JSON.stringify(menu)));
-  await mkdir(dir(), { recursive: true });
-  const destination = path.join(dir(), `${menu.slug}.json`);
-  const temp = `${destination}.${randomUUID()}.tmp`;
-  await writeFile(temp, JSON.stringify(data));
-  await rename(temp, destination);
+  await putObject(
+    dir(),
+    `snapshots/${menu.slug}.json`,
+    JSON.stringify(data),
+    "application/json",
+    true,
+  );
 }
 export async function getPublicMenu(slug: string): Promise<MenuData | null> {
   if (!/^[a-z0-9-]{1,120}$/.test(slug)) return null;
@@ -44,7 +45,7 @@ export async function getPublicMenu(slug: string): Promise<MenuData | null> {
   } catch {
     try {
       return JSON.parse(
-        await readFile(path.join(dir(), `${slug}.json`), "utf8"),
+        (await getObject(dir(), `snapshots/${slug}.json`)).toString("utf8"),
       );
     } catch {
       return null;

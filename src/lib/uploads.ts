@@ -1,8 +1,8 @@
 import sharp from "sharp";
 import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { AppError } from "./http";
+import { putObject } from "./storage";
 export const uploadDir = () =>
   path.resolve(
     /* turbopackIgnore: true */ process.env.UPLOAD_DIR || "var/uploads",
@@ -35,7 +35,6 @@ export async function encodeImage(input: Buffer, mime: string) {
 export async function storeImage(input: Buffer, mime: string) {
   const output = await encodeImage(input, mime);
   const file = `${randomUUID()}.webp`;
-  await mkdir(uploadDir(), { recursive: true });
-  await writeFile(path.join(uploadDir(), file), output, { flag: "wx" });
+  await putObject(uploadDir(), `media/${file}`, output, "image/webp", false);
   return `/media/${file}`;
 }

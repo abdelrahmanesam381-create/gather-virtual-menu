@@ -44,6 +44,16 @@ For independent public serving, run `npm run public:start` in a separate process
 
 Set `APP_URL` to the exact application origin (including port). Mutation requests require that origin. Use HTTPS in production; production session cookies are Secure and HTTP-only. Configure an upstream request-body limit of 6 MB and rate limiting at the proxy. Demo credentials and local database passwords must not be deployed.
 
+## Deploying to Vercel
+
+Vercel has no durable disk, so photos and public snapshots go to a private Supabase Storage bucket when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set (server-only; never `NEXT_PUBLIC_`). Without them the app uses `UPLOAD_DIR` and `SNAPSHOT_DIR` as before.
+
+1. With those two values in `.env`, run `node --env-file=.env scripts/sync-storage.mjs` once. It creates the bucket and copies existing local photos and snapshots.
+2. Import the GitHub repository at vercel.com/new. Set `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` and `APP_URL` (the exact deployed origin, for example `https://your-app.vercel.app`). Invitations also need the `SMTP_*` and `MAIL_FROM` settings.
+3. Run `npm run db:migrate` against the production `DATABASE_URL` before the first deploy and after schema changes.
+
+Vercel limits request bodies to 4.5 MB, so photos between 4.5 and 5 MB are rejected there. The independent public server (`npm run public:start`) is not used on Vercel.
+
 ## Verification
 
 ```sh
